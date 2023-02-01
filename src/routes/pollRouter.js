@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { postChoice, postPoll, postVote, getPoll, getChoice, getResult  } from "../controllers/pollControllers.js"
-import validSchema from "../middlewares/validSchema"
-import { pollSchema } from "../schemas/schemas"
+import validSchema from "../middlewares/validSchema.js"
+import { pollSchema } from "../schemas/schemas.js"
 
 const pollRouter = Router()
 
