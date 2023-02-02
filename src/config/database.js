@@ -8,7 +8,7 @@ let db
 
 try {
     await mongoClient.connect()
-    db = mongoClient.db
+    db = mongoClient.db()
 } catch (error) {
     console.log("Erro ao tentar conectar o servidor.")
 }
