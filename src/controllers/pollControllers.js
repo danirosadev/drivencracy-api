@@ -16,27 +16,26 @@ export async function postPoll(req, res) {
 
 export async function getPoll(req, res) {
     try {
-        const enquetes = await db.collection("enquetes").find({}).toArray()
-        return res.status(201).send(enquetes)
+        const polls = await db.collection("enquetes").find({}).toArray()
+        return res.status(200).send(polls)
     } catch (error) {
         return res.status(500).send(error.message)
     }
 }
 
 export async function postChoice(req, res) {
-    const { title, pollId } = req.body
-    const { id } = req.params
+    const choice = { title: req.body.title, pollId: req.body.pollId }
 
     try {
-        const isPoll = await db.collection("enquetes").findOne({ _id: ObjectId(id) })
+        const isPoll = await db.collection("enquetes").findOne({ _id: ObjectId(choice.pollId) })
         if (!isPoll) return res.sendStatus(404)
 
-        if(title === "") return res.sendStatus(422)
+        if(choice.title === "") return res.sendStatus(422)
 
-        const existPoll = await db.collection("enquetes").findOne({ title })
+        const existPoll = await db.collection("opcoes").findOne({ title: choice.title })
         if (existPoll) return res.sendStatus(409)
 
-        await db.collection("opcoes").insertOne({ title, pollId })
+        await db.collection("opcoes").insertOne(choice)
         return res.status(201).send("Opcao criada")
     } catch (error) {
         return res.status(500).send(error.message)
@@ -44,12 +43,13 @@ export async function postChoice(req, res) {
 }
 
 export async function getChoice(req, res) {
-    const choices = req.body
-    const pollId = req.params.id
+    const { choiceId } = req.params.id
 
     try {
-        await db.collection("opcoes").find(pollId)
+        const choices = await db.collection("opcoes").find({ choiceId }).toArray()
+        if (!choices) return res.sendStatus(404)
 
+        return res.status(200).send(choices)
     } catch (error) {
         return res.status(500).send(error.message)
     }
