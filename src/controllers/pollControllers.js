@@ -78,30 +78,48 @@ export async function postVote(req, res) {
 
 export async function getResult(req, res) {
     const id = req.params.id
-    let counter1 = 0
-    let counter2 = 0
 
     try {
         const pool = await db.collection("enquetes").findOne({ _id: ObjectId(id) })
         const choices = await db.collection("opcoes").find({ pollId: id}).toArray()
         const votes = await db.collection("votos").find({}).toArray()
 
-        const numVotes = []
-        for (const choice of choices){
-            let count = votes.reduce((acc, cur) => cur.choiceId === choice._id.toString ? acc + 1 : cur)
-            numVotes.push(count)
+        const totalVotes = []
+        let cont1 = 0
+        let cont2 = 0
+        let idChoice
+        let choiceTitle
+
+        votes.map( v => {
+            let idVoto = v.choiceId
+            for (let i = 0; i < choices.length; i++) {
+                idChoice = choices[i]._id
+                if (idChoice == idVoto){
+                    totalVotes.push(idChoice)
+                    choiceTitle = choices[i].title
+                }
+
+            }
+        })
+
+        for (let i = 0; i < totalVotes.length; i++){
+            if(totalVotes[i] === totalVotes[i+1]){
+                cont1++
+            } else {
+                cont2++
+            }
         }
 
-        const indexVoted = numVotes.indexOf(Math.max(...numVotes))
-        console.log(indexVoted)
+        let votos = [cont1, cont2]
+        let maxVotos = Math.max(...votos)
 
         const result = {
             _id: pool._id,
             title: pool.title,
             expireAt: pool.expireAt,
             result: {
-                title: choices.title,
-                votes: numVotes.length
+                title: choiceTitle,
+                votes: maxVotos
             }
         }
 
